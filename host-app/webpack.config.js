@@ -2,11 +2,19 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const { dependencies } = require("./package.json");
 
-module.exports = {
-  entry: "./src/index",
-  mode: "development",
+module.exports = (_, argv) => ({
+  output: {
+    publicPath:
+      argv.mode === "development"
+        ? "http://localhost:3000/"
+        : "https://microfrontend-consumer.vercel.app/",
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
+  },
   devServer: {
     port: 3000,
+    historyApiFallback: true,
   },
   module: {
     rules: [
@@ -23,8 +31,39 @@ module.exports = {
         ],
       },
       {
-        test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        test: /\.m?js/,
+        type: "javascript/auto",
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
+        test: /\.(css|s[ac]ss)$/i,
+        use: ["style-loader", "css-loader", "postcss-loader"],
+      },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|ico)$/i,
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              name: "[name].[ext]",
+              outputPath: "images", // This is the directory where your images will be output
+            },
+          },
+        ],
+      },
+      // Rule for processing HTML files
+      {
+        test: /\.html$/,
+        use: [
+          {
+            loader: "html-loader",
+            options: {
+              minimize: true,
+            },
+          },
+        ],
       },
     ],
   },
@@ -34,6 +73,7 @@ module.exports = {
       remotes: {
         Remote: `Remote@http://localhost:4000/moduleEntry.js`,
       },
+      exposes: {},
       shared: {
         ...dependencies,
         react: {
@@ -52,8 +92,5 @@ module.exports = {
       manifest: "./public/manifest.json",
     }),
   ],
-  resolve: {
-    extensions: [".js", ".jsx"],
-  },
   target: "web",
-};
+});
