@@ -4,10 +4,7 @@ const { dependencies } = require("./package.json");
 
 module.exports = (_, argv) => ({
   output: {
-    publicPath:
-      argv.mode === "development"
-        ? "http://localhost:3000/"
-        : "https://microfrontend-consumer.vercel.app/",
+    publicPath: "http://localhost:3000/",
   },
   resolve: {
     extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
@@ -19,7 +16,7 @@ module.exports = (_, argv) => ({
   module: {
     rules: [
       {
-        test: /\.(js|jsx)?$/,
+        test: /\.(ts|tsx|js|jsx)?$/,
         exclude: /node_modules/,
         use: [
           {
@@ -70,10 +67,12 @@ module.exports = (_, argv) => ({
   plugins: [
     new ModuleFederationPlugin({
       name: "Host",
+      filename: "moduleEntry.js",
+      exposes: {},
       remotes: {
         Remote: `Remote@http://localhost:4000/moduleEntry.js`,
       },
-      exposes: {},
+
       shared: {
         ...dependencies,
         react: {
@@ -88,7 +87,6 @@ module.exports = (_, argv) => ({
     }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
-      favicon: "./public/favicon.ico",
       manifest: "./public/manifest.json",
     }),
   ],

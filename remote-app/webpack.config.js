@@ -1,21 +1,22 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const path = require("path");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const { dependencies } = require("./package.json");
 
-module.exports = {
-  entry: "./src/index",
-  mode: "development",
+module.exports = (_, argv) => ({
+  output: {
+    publicPath: "http://localhost:4000/",
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
+  },
   devServer: {
-    static: {
-      directory: path.join(__dirname, "public"),
-    },
     port: 4000,
+    historyApiFallback: true,
   },
   module: {
     rules: [
       {
-        test: /\.(js|jsx)?$/,
+        test: /\.(ts|tsx|js|jsx)?$/,
         exclude: /node_modules/,
         use: [
           {
@@ -27,17 +28,36 @@ module.exports = {
         ],
       },
       {
-        test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        test: /\.m?js/,
+        type: "javascript/auto",
+        resolve: {
+          fullySpecified: false,
+        },
       },
       {
-        test: /\.(gif|png|jpe?g|svg)$/,
+        test: /\.(css|s[ac]ss)$/i,
+        use: ["style-loader", "css-loader", "postcss-loader"],
+      },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|ico)$/i,
         use: [
           {
             loader: "file-loader",
             options: {
               name: "[name].[ext]",
-              outputPath: "assets/images/",
+              outputPath: "images", // This is the directory where your images will be output
+            },
+          },
+        ],
+      },
+      // Rule for processing HTML files
+      {
+        test: /\.html$/,
+        use: [
+          {
+            loader: "html-loader",
+            options: {
+              minimize: true,
             },
           },
         ],
@@ -47,12 +67,13 @@ module.exports = {
   plugins: [
     new ModuleFederationPlugin({
       name: "Remote",
-
       filename: "moduleEntry.js",
       exposes: {
         "./App": "./src/App",
         "./Button": "./src/Button",
       },
+      remotes: {},
+
       shared: {
         ...dependencies,
         react: {
@@ -67,12 +88,8 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
-      favicon: "./public/favicon.ico",
       manifest: "./public/manifest.json",
     }),
   ],
-  resolve: {
-    extensions: [".js", ".jsx"],
-  },
   target: "web",
-};
+});
