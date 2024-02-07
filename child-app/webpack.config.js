@@ -68,7 +68,9 @@ module.exports = (_, argv) => ({
     new ModuleFederationPlugin({
       name: "Child",
       filename: "remoteEntry.js",
-      exposes: {},
+      exposes: {
+        "./ChildApp": "./src/bootstrap",
+      },
       remotes: {},
 
       shared: {

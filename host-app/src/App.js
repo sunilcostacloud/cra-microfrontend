@@ -1,24 +1,33 @@
 import React from "react";
-const RemoteApp = React.lazy(() => import("Remote/App"));
-const RemoteButton = React.lazy(() => import("Remote/Button"));
+import { Switch, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import Header from "./components/Header";
+const RemoteApp = lazy(() => import("./pages/RemoteApp"));
+const ChildApp = lazy(() => import("./pages/ChildApp"));
 
 const App = () => {
   return (
     <div>
-      <h1>This is host app</h1>
-      <div style={{ background: "rgba(43, 192, 219, 0.3)" }}>
-        <h1>This is the Host!</h1>
-        <h2>Remote App:</h2>
-
-        <RemoteApp />
-
-        <h2>Remote Button:</h2>
-
-        <RemoteButton />
-
-        <br />
-        <a href="http://localhost:4000">Link to Remote App</a>
-      </div>
+      <h1>This is the Host!</h1>
+      <Suspense
+        fallback={
+          <>
+            <h1>Loading...</h1>
+          </>
+        }
+      >
+        <div>
+          <Header />
+        </div>
+        <Switch>
+          <Route path="/child-app">
+            <ChildApp />
+          </Route>
+          <Route path="/">
+            <RemoteApp />
+          </Route>
+        </Switch>
+      </Suspense>
     </div>
   );
 };

@@ -69,8 +69,7 @@ module.exports = (_, argv) => ({
       name: "Remote",
       filename: "remoteEntry.js",
       exposes: {
-        "./App": "./src/App",
-        "./Button": "./src/Button",
+        "./RemoteApp": "./src/bootstrap",
       },
       remotes: {},
 
