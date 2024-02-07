@@ -67,10 +67,10 @@ module.exports = (_, argv) => ({
   plugins: [
     new ModuleFederationPlugin({
       name: "Host",
-      filename: "moduleEntry.js",
+      filename: "remoteEntry.js",
       exposes: {},
       remotes: {
-        Remote: `Remote@http://localhost:4000/moduleEntry.js`,
+        Remote: `Remote@http://localhost:4000/remoteEntry.js`,
       },
 
       shared: {
